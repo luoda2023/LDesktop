@@ -1,9 +1,12 @@
-name: 在线构建 Windows 便携版
+name: 在线构建并发布 Release
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: write   # 允许创建 Release
 
 jobs:
   build:
@@ -27,12 +30,41 @@ jobs:
         run: npx electron-vite build
         shell: bash
 
-      - name: 打包 (electron-builder portable)
+      - name: 打包 portable exe (electron-builder)
         run: npx electron-builder --win portable
         shell: bash
 
-      - name: 上传构建产物
+      - name: 列出产物
+        run: ls -la release/
+        shell: bash
+
+      - name: 上传构建产物 (Actions Artifacts)
         uses: actions/upload-artifact@v4
         with:
           name: LDesktop-Windows-Portable
           path: release/*.exe
+
+      - name: 发布到 GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.1.0-${{ github.run_number }}
+          name: LDesktop v1.1.0 (Build #${{ github.run_number }})
+          body: |
+            # Windows 运维远程桌面管理工具
+
+            ## 使用说明
+            下载下方 **.exe** 文件,双击即可运行,无需安装。
+            程序首次启动会在 `%APPDATA%/remote-desktop-manager/` 目录下创建本地数据库。
+
+            ## 版本说明
+            - 基于 Electron 28 + React 18 + Ant Design 5
+            - 密码使用 Windows DPAPI (safeStorage) 加密后本地存储
+            - 查看已保存密码前需验证 Windows 登录密码
+            - 一键调用 mstsc 免密 RDP 登录,会话结束自动清理凭据
+
+            ## 构建信息
+            - Source: ${{ github.repository }}
+            - Commit: ${{ github.sha }}
+            - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          files: release/*.exe
+          prerelease: false
