@@ -147,7 +147,7 @@ namespace p2pconn
                 if (connection == null)
                 {
                     label4.Invoke((MethodInvoker)(() => label4.ForeColor = Color.Red));
-                    label4.Invoke((MethodInvoker)(() => label4.Text = "无法建立 P2P 连接到  + remoteIp)); 
+                    label4.Invoke((MethodInvoker)(() => label4.Text = "无法建立 P2P 连接到 " + remoteIp)); 
                     return;
                 }
                 try
@@ -158,13 +158,13 @@ namespace p2pconn
                 catch (System.IO.IOException e1)
                 {
                     r_chat.Invoke((MethodInvoker)(() => r_chat.ForeColor = Color.Red));
-                    r_chat.Invoke((MethodInvoker)(() => r_chat.Text = "连接错误:  + e1.Message));
+                    r_chat.Invoke((MethodInvoker)(() => r_chat.Text = "连接错误: " + e1.Message));
                 }
             }
             catch (System.IO.IOException e2)
             {
                 r_chat.Invoke((MethodInvoker)(() => r_chat.ForeColor = Color.Red));
-                r_chat.Invoke((MethodInvoker)(() => r_chat.Text = "连接错误:  + e2.Message));
+                r_chat.Invoke((MethodInvoker)(() => r_chat.Text = "连接错误: " + e2.Message));
             }
         }
 
