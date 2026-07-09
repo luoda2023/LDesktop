@@ -50,19 +50,20 @@ namespace p2pconn
             // UPnP 端口自动映射探测
             System.Threading.ThreadPool.QueueUserWorkItem(_ =>
             {
-                var result = UPnPHelper.TryPortMapping(GetPortNumber());
+                int port = GetPortNumber();
+                var result = UPnPHelper.TryPortMapping(port, port);
                 this.Invoke((MethodInvoker)(() =>
                 {
-                    if (result.success)
+                    if (result.Success)
                     {
                         lblUpnpDot.ForeColor = System.Drawing.Color.FromArgb(34, 197, 94);
-                        lblUpnpText.Text = result.message;
+                        lblUpnpText.Text = result.Message;
                         pnlUpnp.BackColor = System.Drawing.Color.FromArgb(220, 252, 231);
                     }
                     else
                     {
                         lblUpnpDot.ForeColor = System.Drawing.Color.FromArgb(234, 179, 8);
-                        lblUpnpText.Text = result.message;
+                        lblUpnpText.Text = result.Message;
                         pnlUpnp.BackColor = System.Drawing.Color.FromArgb(254, 249, 195);
                     }
                 }));
