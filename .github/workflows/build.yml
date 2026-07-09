@@ -6,65 +6,73 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # 允许创建 Release
+  contents: write
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+    - name: 检出代码
+      uses: actions/checkout@v4
 
-      - name: 安装 Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+    - name: 设置 MSBuild
+      uses: microsoft/setup-msbuild@v1
+      with:
+        msbuild-version: '17'
 
-      - name: 安装依赖
-        run: npm ci
-        shell: bash
+    - name: 还原 NuGet 包
+      run: nuget restore p2pconn.sln
 
-      - name: 编译 (electron-vite build)
-        run: npx electron-vite build
-        shell: bash
+    - name: 编译 Release
+      run: msbuild p2pconn.sln /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal
 
-      - name: 打包 portable exe (electron-builder)
-        run: npx electron-builder --win portable
-        shell: bash
+    - name: 列出构建产物
+      run: ls -R ./p2pconn/bin/Release
+      shell: bash
 
-      - name: 列出产物
-        run: ls -la release/
-        shell: bash
+    - name: 整理可执行程序目录
+      shell: bash
+      run: |
+        mkdir -p publish
+        cp ./p2pconn/bin/Release/p2p.exe publish/LDesktop.exe
+        # 把 Newtonsoft.Json.dll 一并打包随 exe 同目录
+        cp ./packages/Newtonsoft.Json.13.0.1/lib/net45/Newtonsoft.Json.dll publish/ 2>/dev/null || true
+        ls -la publish/
 
-      - name: 上传构建产物 (Actions Artifacts)
-        uses: actions/upload-artifact@v4
-        with:
-          name: LDesktop-Windows-Portable
-          path: release/*.exe
+    - name: 上传构建产物 (Actions Artifacts)
+      uses: actions/upload-artifact@v4
+      with:
+        name: LDesktop-Windows
+        path: publish/*
 
-      - name: 发布到 GitHub Releases
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.1.0-${{ github.run_number }}
-          name: LDesktop v1.1.0 - Build ${{ github.run_number }}
-          body: |
-            # Windows 运维远程桌面管理工具
+    - name: 发布到 GitHub Releases
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: LDesktop v1.0.${{ github.run_number }}
+        body: |
+          # LDesktop 远程协助
 
-            ## 使用说明
-            下载下方 **.exe** 文件,双击即可运行,无需安装。
-            程序首次启动会在 `%APPDATA%/remote-desktop-manager/` 目录下创建本地数据库。
+          ## 使用说明
+          下载下方 **LDesktop.zip**，解压后双击 `LDesktop.exe` 即可运行。
 
-            ## 版本说明
-            - 基于 Electron 28 + React 18 + Ant Design 5
-            - 密码使用 Windows DPAPI (safeStorage) 加密后本地存储
-            - 查看已保存密码前需验证 Windows 登录密码
-            - 一键调用 mstsc 免密 RDP 登录,会话结束自动清理凭据
+          ## 使用流程
+          1. A 和 B 双方都打开 LDesktop
+          2. B 把界面上显示的 "外网 IP" 复制发送给 A
+          3. A 在 "远端地址" 中粘贴 B 的 IP:端口，点击 "连接远程"
+          4. 连接成功后，B 点击 "远程桌面" 让 A 看到桌面
+          5. A 可直接通过鼠标键盘操作 B 的电脑
 
-            ## 构建信息
-            - Source: ${{ github.repository }}
-            - Commit: ${{ github.sha }}
-            - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          files: release/*.exe
-          prerelease: false
+          ## 构建信息
+          - Source: ${{ github.repository }}
+          - Commit: ${{ github.sha }}
+          - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          ## 运行环境
+          - Windows 7 及以上
+          - .NET Framework 4.8 (Win10 及以上系统已自带)
+        files: |
+          publish/LDesktop.exe
+          publish/Newtonsoft.Json.dll
+        prerelease: false
