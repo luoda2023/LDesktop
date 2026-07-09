@@ -47,6 +47,35 @@ namespace p2pconn
             dspeed.SelectedIndex = 2;
             CheckDataGridView();
             GetEndPoint();
+            // UPnP 端口自动映射探测
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                var result = UPnPHelper.TryPortMapping(GetPortNumber());
+                this.Invoke((MethodInvoker)(() =>
+                {
+                    if (result.success)
+                    {
+                        lblUpnpDot.ForeColor = System.Drawing.Color.FromArgb(34, 197, 94);
+                        lblUpnpText.Text = result.message;
+                        pnlUpnp.BackColor = System.Drawing.Color.FromArgb(220, 252, 231);
+                    }
+                    else
+                    {
+                        lblUpnpDot.ForeColor = System.Drawing.Color.FromArgb(234, 179, 8);
+                        lblUpnpText.Text = result.message;
+                        pnlUpnp.BackColor = System.Drawing.Color.FromArgb(254, 249, 195);
+                    }
+                }));
+            });
+        }
+
+        private int GetPortNumber()
+        {
+            try
+            {
+                return ((System.Net.IPEndPoint)socket.LocalEndPoint).Port;
+            }
+            catch { return 21118; }
         }
 
         private void CheckDataGridView()

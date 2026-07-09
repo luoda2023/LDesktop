@@ -35,10 +35,9 @@ jobs:
       shell: bash
       run: |
         mkdir -p publish
-        cp ./p2pconn/bin/Release/p2p.exe publish/LDesktop.exe
-        # 把 Newtonsoft.Json.dll 一并打包随 exe 同目录
-        cp ./packages/Newtonsoft.Json.13.0.1/lib/net45/Newtonsoft.Json.dll publish/ 2>/dev/null || true
-        ls -la publish/
+        # 直接复制 LDesktop.exe（Costura.Fody 已将依赖嵌入其中）
+        find ./p2pconn/bin/Release -name "LDesktop.exe" -exec cp {} publish/ \;
+        ls -lah publish/
 
     - name: 上传构建产物 (Actions Artifacts)
       uses: actions/upload-artifact@v4
@@ -74,5 +73,4 @@ jobs:
           - .NET Framework 4.8 (Win10 及以上系统已自带)
         files: |
           publish/LDesktop.exe
-          publish/Newtonsoft.Json.dll
         prerelease: false
