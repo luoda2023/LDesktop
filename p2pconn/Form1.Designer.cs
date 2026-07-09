@@ -375,8 +375,6 @@ namespace p2pconn
             this.ResumeLayout(false);
         }
 
-        #endregion
-
         private System.Windows.Forms.Panel pnlUpnp;
         private System.Windows.Forms.Label lblUpnpDot;
         private System.Windows.Forms.Label lblUpnpText;
