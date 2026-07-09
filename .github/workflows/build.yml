@@ -24,8 +24,8 @@ jobs:
     - name: 还原 NuGet 包
       run: nuget restore p2pconn.sln
 
-    - name: 编译 Release
-      run: msbuild p2pconn.sln /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal
+    - name: 编译 Release (直接构建 csproj，跳过 sln 平台映射)
+      run: msbuild p2pconn/p2pconn.csproj /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal
 
     - name: 列出构建产物
       run: ls -R ./p2pconn/bin/Release
