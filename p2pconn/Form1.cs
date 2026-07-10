@@ -44,7 +44,6 @@ namespace p2pconn
         private void Form1_Load(object sender, EventArgs e)
         {
             myname = Environment.UserName;
-            dspeed.SelectedIndex = 2;
             CheckDataGridView();
             GetEndPoint();
             // UPnP 端口自动映射探测
