@@ -30,6 +30,23 @@ namespace p2pconn
                 System.Windows.Forms.ControlStyles.AllPaintingInWmPaint |
                 System.Windows.Forms.ControlStyles.UserPaint, true);
             this.UpdateStyles();
+            // 修复文字虚边：递归对所有 Label/Button/Panel 启用 GDI+ 清晰渲染
+            EnableClearText(this);
+        }
+
+        private void EnableClearText(System.Windows.Forms.Control parent)
+        {
+            foreach (System.Windows.Forms.Control c in parent.Controls)
+            {
+                if (c is System.Windows.Forms.Label lbl)
+                    lbl.UseCompatibleTextRendering = true;
+                else if (c is System.Windows.Forms.Button btn)
+                    btn.UseCompatibleTextRendering = true;
+                else if (c is System.Windows.Forms.TextBox txt)
+                    txt.UseCompatibleTextRendering = true;
+                if (c.HasChildren)
+                    EnableClearText(c);
+            }
         }
 
         static Random r = new Random();
@@ -52,27 +69,6 @@ namespace p2pconn
             myname = Environment.UserName;
             CheckDataGridView();
             GetEndPoint();
-            // UPnP 端口自动映射探测
-            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
-            {
-                int port = GetPortNumber();
-                var result = UPnPHelper.TryPortMapping(port, port);
-                this.Invoke((MethodInvoker)(() =>
-                {
-                    if (result.Success)
-                    {
-                        lblUpnpDot.ForeColor = System.Drawing.Color.FromArgb(34, 197, 94);
-                        lblUpnpText.Text = result.Message;
-                        pnlUpnp.BackColor = System.Drawing.Color.FromArgb(220, 252, 231);
-                    }
-                    else
-                    {
-                        lblUpnpDot.ForeColor = System.Drawing.Color.FromArgb(234, 179, 8);
-                        lblUpnpText.Text = result.Message;
-                        pnlUpnp.BackColor = System.Drawing.Color.FromArgb(254, 249, 195);
-                    }
-                }));
-            });
         }
 
         private int GetPortNumber()

@@ -34,9 +34,6 @@ namespace p2pconn
             var fHuge = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold);
 
             // 容器
-            this.pnlUpnp = new System.Windows.Forms.Panel();
-            this.lblUpnpDot = new System.Windows.Forms.Label();
-            this.lblUpnpText = new System.Windows.Forms.Label();
             this.pnlLeft = new System.Windows.Forms.Panel();
             this.lblBrand = new System.Windows.Forms.Label();
             this.pnlPages = new System.Windows.Forms.Panel();
@@ -98,7 +95,6 @@ namespace p2pconn
 
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.pnlUpnp.SuspendLayout();
             this.pnlLeft.SuspendLayout();
             this.pnlPages.SuspendLayout();
             this.pgConnect.SuspendLayout();
@@ -118,25 +114,6 @@ namespace p2pconn
                 b.Cursor = System.Windows.Forms.Cursors.Hand;
                 b.UseVisualStyleBackColor = false;
             };
-
-            // ========= pnlUpnp UPnP 状态条 =========
-            this.pnlUpnp.BackColor = amberBg;
-            this.pnlUpnp.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlUpnp.Height = 40;
-            this.pnlUpnp.Controls.Add(this.lblUpnpDot);
-            this.pnlUpnp.Controls.Add(this.lblUpnpText);
-
-            this.lblUpnpDot.Text = "●";
-            this.lblUpnpDot.Font = new System.Drawing.Font("Microsoft YaHei UI", 16F, System.Drawing.FontStyle.Bold);
-            this.lblUpnpDot.ForeColor = amber;
-            this.lblUpnpDot.Location = new System.Drawing.Point(24, 6);
-            this.lblUpnpDot.Size = new System.Drawing.Size(24, 28);
-
-            this.lblUpnpText.Text = "正在检测 UPnP 穿透状态...";
-            this.lblUpnpText.Font = new System.Drawing.Font("Microsoft YaHei UI", 11F, System.Drawing.FontStyle.Bold);
-            this.lblUpnpText.ForeColor = textP;
-            this.lblUpnpText.Location = new System.Drawing.Point(52, 8);
-            this.lblUpnpText.Size = new System.Drawing.Size(700, 24);
 
             // ========= pnlLeft 左侧导航 =========
             this.pnlLeft.BackColor = System.Drawing.Color.FromArgb(241, 245, 249);
@@ -344,7 +321,6 @@ namespace p2pconn
             this.ClientSize = new System.Drawing.Size(820, 540);
             this.Controls.Add(this.pnlPages);
             this.Controls.Add(this.pnlLeft);
-            this.Controls.Add(this.pnlUpnp);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button7);
@@ -373,13 +349,9 @@ namespace p2pconn
             this.pgConnect.ResumeLayout(false);
             this.pnlPages.ResumeLayout(false);
             this.pnlLeft.ResumeLayout(false);
-            this.pnlUpnp.ResumeLayout(false);
             this.ResumeLayout(false);
         }
 
-        private System.Windows.Forms.Panel pnlUpnp;
-        private System.Windows.Forms.Label lblUpnpDot;
-        private System.Windows.Forms.Label lblUpnpText;
         private System.Windows.Forms.Panel pnlLeft;
         private System.Windows.Forms.Label lblBrand;
         private System.Windows.Forms.Panel pnlPages;
