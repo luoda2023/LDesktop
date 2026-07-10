@@ -42,8 +42,6 @@ namespace p2pconn
                     lbl.UseCompatibleTextRendering = true;
                 else if (c is System.Windows.Forms.Button btn)
                     btn.UseCompatibleTextRendering = true;
-                else if (c is System.Windows.Forms.TextBox txt)
-                    txt.UseCompatibleTextRendering = true;
                 if (c.HasChildren)
                     EnableClearText(c);
             }
