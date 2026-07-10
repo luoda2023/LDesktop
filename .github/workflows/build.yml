@@ -27,21 +27,23 @@ jobs:
     - name: 编译 Release
       run: msbuild p2pconn/p2pconn.csproj /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal
 
-    - name: 用 ILRepack 合并为单 exe
+    - name: 用 ILMerge 合并为单 exe
       shell: bash
       run: |
-        # 安装 ILRepack CLI 工具
-        nuget install ILRepack.Lib.MSBuild.Task -Version 2.0.40 -OutputDirectory packages
-        ILREPACK="packages/ILRepack.Lib.MSBuild.Task.2.0.40/tools/net462/ILRepack.exe"
+        # 安装 ILMerge（含独立 exe）
+        nuget install ILMerge -Version 3.0.41 -OutputDirectory packages
+        ILMERGE="packages/ILMerge.3.0.41/tools/net452/ILMerge.exe"
         # 合并 LDesktop.exe + Newtonsoft.Json.dll → 单个 LDesktop.exe
         mkdir -p publish
-        "$ILREPACK" \
+        "$ILMERGE" \
+          /target:exe \
+          /targetplatform:v4 \
           /out:publish/LDesktop.exe \
-          /lib:./p2pconn/bin/Release \
+          /lib:./packages/ILMerge.3.0.41/tools/net452 \
           /lib:./packages/Newtonsoft.Json.13.0.1/lib/net45 \
-          /wildcards \
           ./p2pconn/bin/Release/LDesktop.exe \
           ./packages/Newtonsoft.Json.13.0.1/lib/net45/Newtonsoft.Json.dll
+        cp ./p2pconn/bin/Release/LDesktop.exe.config publish/ 2>/dev/null || true
         ls -lah publish/
 
     - name: 上传构建产物 (Actions Artifacts)
