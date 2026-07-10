@@ -135,6 +135,7 @@ namespace p2pconn
 
             // ========= pgConnect =========
             this.pgConnect.BackColor = bgPage;
+            this.pgConnect.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pgConnect.Controls.Add(this.cardWan);
             this.pgConnect.Controls.Add(this.cardLan);
             this.pgConnect.Controls.Add(this.cardRemote);
@@ -318,7 +319,7 @@ namespace p2pconn
             // ========= Form1 =========
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.DoubleBuffered = true;
-            this.ClientSize = new System.Drawing.Size(820, 540);
+            this.ClientSize = new System.Drawing.Size(1000, 800);
             this.Controls.Add(this.pnlPages);
             this.Controls.Add(this.pnlLeft);
             this.Controls.Add(this.dataGridView1);
