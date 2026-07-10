@@ -339,6 +339,8 @@ namespace p2pconn
             this.pictureBox1.Location = new System.Drawing.Point(-1000, -1000);
 
             // ========= Form1 =========
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.DoubleBuffered = true;
             this.ClientSize = new System.Drawing.Size(820, 540);
             this.Controls.Add(this.pnlPages);
             this.Controls.Add(this.pnlLeft);

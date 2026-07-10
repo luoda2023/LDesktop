@@ -24,6 +24,12 @@ namespace p2pconn
             GlobalVariables.Root = this;
             InitializeComponent();
             Control.CheckForIllegalCrossThreadCalls = false;
+            // 高 DPI 文字防虚：开启窗体双缓冲
+            this.SetStyle(
+                System.Windows.Forms.ControlStyles.OptimizedDoubleBuffer |
+                System.Windows.Forms.ControlStyles.AllPaintingInWmPaint |
+                System.Windows.Forms.ControlStyles.UserPaint, true);
+            this.UpdateStyles();
         }
 
         static Random r = new Random();
@@ -80,29 +86,45 @@ namespace p2pconn
 
         private void CheckDataGridView()
         {
-            if (File.Exists(StunServersJson))
+            try
             {
-                // Read data from StunServersJson
-                Array StunServers = StunServer.GetStunServersFromFile(StunServersJson);
-                if (StunServers.Length > 0)
+                // 确保 dataGridView1 有 Server/Port 两列
+                if (this.dataGridView1.Columns.Count < 2)
                 {
-                    int i = 0;
-                    foreach (var _stun in StunServer.GetStunServersFromFile(StunServersJson))
+                    this.dataGridView1.Columns.Clear();
+                    this.dataGridView1.Columns.Add("Server", "Server");
+                    this.dataGridView1.Columns.Add("Port", "Port");
+                    this.dataGridView1.AllowUserToAddRows = false;
+                    this.dataGridView1.ColumnHeadersVisible = false;
+                    this.dataGridView1.RowHeadersVisible = false;
+                    this.dataGridView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+                    this.dataGridView1.BackgroundColor = System.Drawing.Color.Transparent;
+                }
+
+                if (File.Exists(StunServersJson))
+                {
+                    Array StunServers = StunServer.GetStunServersFromFile(StunServersJson);
+                    if (StunServers.Length > 0)
                     {
-                        this.dataGridView1.Rows.Insert(i, _stun.Server, _stun.Port);
-                        i++;
+                        int i = 0;
+                        foreach (var _stun in StunServer.GetStunServersFromFile(StunServersJson))
+                        {
+                            this.dataGridView1.Rows.Insert(i, _stun.Server, _stun.Port);
+                            i++;
+                        }
                     }
-                } else
+                    else
+                    {
+                        this.dataGridView1.Rows.Insert(0, "stun.l.google.com", 19302);
+                    }
+                }
+                else
                 {
                     this.dataGridView1.Rows.Insert(0, "stun.l.google.com", 19302);
+                    SaveDataToJsoin();
                 }
             }
-            else
-            {
-                // Save data from dataGridView to StunServersJson
-                this.dataGridView1.Rows.Insert(0, "stun.l.google.com", 19302);
-                SaveDataToJsoin();
-            }
+            catch { }
         }
 
         private void GetEndPoint()
