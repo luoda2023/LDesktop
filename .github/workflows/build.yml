@@ -24,26 +24,31 @@ jobs:
     - name: 还原 NuGet 包
       run: nuget restore p2pconn.sln
 
-    - name: 编译 Release (直接构建 csproj，跳过 sln 平台映射)
+    - name: 编译 Release
       run: msbuild p2pconn/p2pconn.csproj /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal
 
-    - name: 列出构建产物
-      run: ls -R ./p2pconn/bin/Release
-      shell: bash
-
-    - name: 整理可执行程序目录
+    - name: 用 ILRepack 合并为单 exe
       shell: bash
       run: |
+        # 安装 ILRepack CLI 工具
+        nuget install ILRepack.Lib.MSBuild.Task -Version 2.0.40 -OutputDirectory packages
+        ILREPACK="packages/ILRepack.Lib.MSBuild.Task.2.0.40/tools/net462/ILRepack.exe"
+        # 合并 LDesktop.exe + Newtonsoft.Json.dll → 单个 LDesktop.exe
         mkdir -p publish
-        # 直接复制 LDesktop.exe（Costura.Fody 已将依赖嵌入其中）
-        find ./p2pconn/bin/Release -name "LDesktop.exe" -exec cp {} publish/ \;
+        "$ILREPACK" \
+          /out:publish/LDesktop.exe \
+          /lib:./p2pconn/bin/Release \
+          /lib:./packages/Newtonsoft.Json.13.0.1/lib/net45 \
+          /wildcards \
+          ./p2pconn/bin/Release/LDesktop.exe \
+          ./packages/Newtonsoft.Json.13.0.1/lib/net45/Newtonsoft.Json.dll
         ls -lah publish/
 
     - name: 上传构建产物 (Actions Artifacts)
       uses: actions/upload-artifact@v4
       with:
         name: LDesktop-Windows
-        path: publish/*
+        path: publish/LDesktop.exe
 
     - name: 发布到 GitHub Releases
       uses: softprops/action-gh-release@v2
@@ -54,7 +59,7 @@ jobs:
           # LDesktop 远程协助
 
           ## 使用说明
-          下载下方 **LDesktop.zip**，解压后双击 `LDesktop.exe` 即可运行。
+          下载 **LDesktop.exe**，双击即可运行，无需安装，无需额外 DLL。
 
           ## 使用流程
           1. A 和 B 双方都打开 LDesktop
