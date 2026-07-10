@@ -243,34 +243,58 @@ namespace p2pconn
                 }
             }
 
+            // 关键修复：如果列表为空，硬编码加入多个公共 STUN 服务器作为 fallback
+            if (stunServers.Count == 0)
+            {
+                stunServers.Add(new Tuple<string, int>("stun.l.google.com", 19302));
+                stunServers.Add(new Tuple<string, int>("stun1.l.google.com", 19302));
+                stunServers.Add(new Tuple<string, int>("stun2.l.google.com", 19302));
+                stunServers.Add(new Tuple<string, int>("stun.stunprotocol.org", 3478));
+                stunServers.Add(new Tuple<string, int>("stun.qq.com", 3478));
+            }
+
             // https://gist.github.com/zziuni/3741933
 
             // stunServers.Add(new Tuple<string, int>("stun.l.google.com", 19302));
 
             Console.WriteLine("Contacting STUN servers to obtain your IP");
 
+            // 记录失败的尝试，用于诊断
+            int failCount = 0;
+
             foreach (Tuple<string, int> server in stunServers)
             {
                 string host = server.Item1;
                 int port = server.Item2;
 
-                StunResult externalEndPoint = StunClient.Query(host, port, socket);
-
-                if (externalEndPoint.NetType == StunNetType.UdpBlocked)
+                try
                 {
+                    StunResult externalEndPoint = StunClient.Query(host, port, socket);
+
+                    if (externalEndPoint.NetType == StunNetType.UdpBlocked)
+                    {
+                        failCount++;
+                        continue;
+                    }
+
+                    Console.WriteLine("Your firewall is {0}", externalEndPoint.NetType.ToString());
+
+                    return new P2pEndPoint()
+                    {
+                        External = externalEndPoint.PublicEndPoint,
+                        Internal = (socket.LocalEndPoint as IPEndPoint)
+                    };
+                }
+                catch (Exception ex)
+                {
+                    failCount++;
+                    Console.WriteLine("STUN {0}:{1} failed: {2}", host, port, ex.Message);
                     continue;
                 }
-
-                Console.WriteLine("Your firewall is {0}", externalEndPoint.NetType.ToString());
-
-                return new P2pEndPoint()
-                {
-                    External = externalEndPoint.PublicEndPoint,
-                    Internal = (socket.LocalEndPoint as IPEndPoint)
-                };
             }
 
-            MessageBox.Show("无法获取外部 IP，未找到可用的 STUN 服务器");
+            string errMsg = string.Format("无法获取外部 IP，所有 STUN 服务器尝试失败 (共 {0} 个)。请检查网络连接或防火墙设置。", failCount);
+            MessageBox.Show(errMsg, "STUN 错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return null;
         }
 
